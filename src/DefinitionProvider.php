@@ -29,6 +29,7 @@ final class DefinitionProvider
 
     private PropertyTypeResolver $propertyTypeResolver;
     private bool $serializePublicMethods;
+    private ConstructorResolver $constructorResolver;
 
     public function __construct(
         DefaultCasterRepository     $defaultCasterRepository = null,
@@ -36,6 +37,7 @@ final class DefinitionProvider
         DefaultSerializerRepository $defaultSerializerRepository = null,
         PropertyTypeResolver        $propertyTypeResolver = null,
         bool                        $serializePublicMethods = true,
+        ConstructorResolver         $constructorResolver = null,
     )
     {
         $this->defaultCasters = $defaultCasterRepository ?? DefaultCasterRepository::builtIn();
@@ -43,6 +45,7 @@ final class DefinitionProvider
         $this->defaultSerializers = $defaultSerializerRepository ?? DefaultSerializerRepository::builtIn();
         $this->propertyTypeResolver = $propertyTypeResolver ?? new NaivePropertyTypeResolver();
         $this->serializePublicMethods = $serializePublicMethods;
+        $this->constructorResolver = $constructorResolver ?? new AttributeConstructorResolver();
     }
 
     /**
@@ -62,7 +65,7 @@ final class DefinitionProvider
         }
 
         $reflectionClass = new ReflectionClass($className);
-        $constructor = $this->resolveConstructor($reflectionClass);
+        $constructor = $this->constructorResolver->resolveConstructor($reflectionClass);
         $classAttributes = $reflectionClass->getAttributes();
 
         /** @var PropertyHydrationDefinition[] $definitions */
